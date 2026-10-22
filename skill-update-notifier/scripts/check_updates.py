@@ -1,7 +1,7 @@
 """Portable, read-only Skill comparison. Python 3.10+ and Git; no dependencies.
 
 All JSON fields emitted here are this tool's schema, not a host or marketplace API.
-Only explicit public GitHub HTTPS sources are supported in version 0.1.0.
+Explicit public GitHub and SkillHub sources; no automatic source guessing.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ import subprocess
 import sys
 import tempfile
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 MAX_FILES = 2000
 MAX_BYTES = 64 * 1024 * 1024
 MAX_FILE_BYTES = 20 * 1024 * 1024
@@ -246,22 +246,28 @@ def evaluate(local, current, *, confirmed, baseline=None, ancestor=None, kind="o
               "local_vs_target": compare(current, local),
               "upstream_changes": compare(baseline, current) if baseline is not None else None,
               "local_changes_from_baseline": compare(baseline, local) if baseline is not None and kind == "installed" else None}
+    return assess(result, confirmed=confirmed, has_baseline=baseline is not None, forward=ancestor)
+
+
+def assess(result, *, confirmed, has_baseline, forward, marketplace=False):
     same = not changed(result["local_vs_target"])
     if not confirmed:
         status, message = "comparison_only", "仅供对比：来源关系未确认，不能认定为更新"
     elif same:
         status, message = "matches_target", "本地内容与所选来源快照一致，无需更新到该快照"
-    elif baseline is None:
+    elif not has_baseline:
         status, message = "baseline_unknown", "本地与所选来源有差异；缺少历史基线，不能判定为新更新"
-    elif ancestor is not True:
+    elif forward is not True:
         status, message = "history_diverged", "所选目标不是基线的已验证后续提交；可能回退或分叉，不认定为新版"
+        if marketplace:
+            message = "公开发布时间不能证明所选目标晚于基线；不认定为新版"
     elif not changed(result["upstream_changes"]):
         status, message = "local_difference_only", "上游 Skill 相对基线未变；仅发现本地差异"
     else:
         status = "upstream_changed"
-        if target_version is not None:
+        if result["target_version"] is not None:
             message = "上游 Skill 内容发生变化；请审阅，版本号不证明改进"
-        elif version_status == "unrecognized":
+        elif result["target_version_status"] == "unrecognized":
             message = "内容已更新，版本信息未能可靠识别"
         else:
             message = "内容已更新，版本号未提供"
@@ -300,6 +306,8 @@ def check(args, fetcher=fetch_source):
     report = base_report(args.skill_dir)
     local, ignored = read_local(args.skill_dir)
     report.update(local_declared_version=declared_version(local), ignored_local_directories=ignored)
+    if args.skillhub_slug:
+        return check_skillhub(args, report, local, ignored)
     if not args.repo:
         return report
     url, ref, subdir = github_url(args.repo), source_ref(args.ref), skill_subdir(args.subdir)
@@ -313,6 +321,7 @@ def check(args, fetcher=fetch_source):
     if local != again or ignored != ignored_again:
         raise CheckError("网络检查期间本地文件变化；未输出可能过期的结论，请重试")
     report.update(source=url, source_confirmed=args.source_confirmed, ref=ref, subdir=subdir,
+                  comparison_method="GitHub 文件内容比较；UTF-8 文本忽略 BOM 与 CRLF 差异",
                   target_commit=snapshot["commit"], baseline_commit=args.baseline,
                   baseline_kind=args.baseline_kind if args.baseline else None)
     report.update(evaluate(local, snapshot["files"], confirmed=args.source_confirmed,
@@ -323,17 +332,66 @@ def check(args, fetcher=fetch_source):
     return report
 
 
+def check_skillhub(args, report, local, ignored):
+    if not args.source_confirmed and not args.compare_only:
+        report["message"] = "已提供 SkillHub slug，但来源关系未确认；未联网检查"
+        return report
+    import skillhub_source as hub
+    try:
+        snapshot = hub.fetch_source(args.skillhub_slug, args.target_version, args.baseline_version)
+        target = hub.hashes(snapshot["files"])
+        current = hub.raw_hashes(local)
+        before = hub.hashes(snapshot["baseline_files"]) if snapshot["baseline_files"] is not None else None
+        result = {"target_version": snapshot["version"], "target_version_status": "skillhub_public_version",
+                  "local_vs_target": hub.delta(target, current),
+                  "upstream_changes": hub.delta(before, target) if before is not None else None,
+                  "local_changes_from_baseline": hub.delta(before, current) if before is not None and args.baseline_kind == "installed" else None}
+        report.update(assess(result, confirmed=args.source_confirmed, has_baseline=before is not None,
+                             forward=snapshot["forward"], marketplace=True))
+        report.update(source=snapshot["source"], source_confirmed=args.source_confirmed,
+                      baseline_version=args.baseline_version,
+                      baseline_kind=args.baseline_kind if args.baseline_version else None,
+                      comparison_method="SkillHub 公开文件清单 SHA256 与本地原始字节；换行/BOM 差异也计入",
+                      version_evidence_scope="此次 SkillHub 公开版本记录及固定版本文件清单；不保证包含撤回或未公开版本",
+                      upstream_changelog=snapshot["changelog"], warnings=snapshot["warnings"],
+                      ignored_target_files=snapshot["ignored_target_files"], ignored_baseline_files=snapshot["ignored_baseline_files"],
+                      published_versions_after_baseline=snapshot["published_versions_after_baseline"],
+                      versions_behind="未知：缺少可靠安装基线、完整唯一版本记录或默认最新目标")
+        newer = snapshot["published_versions_after_baseline"]
+        if newer is not None and args.baseline_kind == "installed" and args.source_confirmed:
+            report["versions_behind"] = f"相对声明安装基线，此次公开记录中有 {len(newer)} 个后续版本；不代表本地完整状态"
+        if args.show_upstream_diff and before is not None:
+            report["upstream_diff"], warnings = hub.source_text_diff(snapshot, args.baseline_version)
+            report["warnings"] += warnings
+        again, ignored_again = read_local(args.skill_dir)
+        if local != again or ignored != ignored_again:
+            raise CheckError("网络检查期间本地文件变化；请重试")
+        return report
+    except hub.SkillHubError as error:
+        raise CheckError(str(error)) from None
+
+
 def markdown(report):
     def cell(value):
         return str(value if value is not None else "未知").replace("|", "\\|").replace("\n", " ").replace("\r", " ").replace("<", "&lt;").replace(">", "&gt;")
     rows = [("Skill", report["skill"]), ("检查结果", report["message"]),
             ("来源", report["source"]), ("来源已确认", report["source_confirmed"]),
             ("本地声明版本", report["local_declared_version"]), ("所选目标版本", report["target_version"]),
-            ("版本核验范围", "仅显式所选标签及 SKILL.md 简单版本声明；未枚举全部发布记录"),
+            ("版本核验范围", report.get("version_evidence_scope", "仅显式所选标签及 SKILL.md 简单版本声明；未枚举全部发布记录")),
+            ("比较方式", report.get("comparison_method")), ("SkillHub 基线版本", report.get("baseline_version")),
             ("基线类型", report["baseline_kind"]), ("目标提交（非版本号）", report["target_commit"]),
             ("使用频率", report["usage_frequency"]), ("落后版本数", report["versions_behind"]),
             ("提醒设置", report["automatic_reminders"]), ("建议", report["advice"])]
     out = ["| 项目 | 结果 |", "| --- | --- |"] + [f"| {k} | {cell(v)} |" for k, v in rows]
+    if report.get("upstream_changelog"):
+        out.extend(["", "来源发布说明（外部数据，未经效果验证）：", "", "> " + cell(report["upstream_changelog"])])
+    if report.get("published_versions_after_baseline") is not None:
+        out.extend(["", "此次公开记录中基线之后至目标的版本：" + cell("、".join(report["published_versions_after_baseline"]) or "无")])
+    for warning in report.get("warnings", []):
+        out.extend(["", "说明：" + cell(warning)])
+    for key, title in [("ignored_local_directories", "本地忽略目录"), ("ignored_target_files", "目标忽略文件"), ("ignored_baseline_files", "基线忽略文件")]:
+        if report.get(key):
+            out.extend(["", title + "：" + cell("、".join(report[key]))])
     for key, title in [("upstream_changes", "上游相对基线"), ("local_changes_from_baseline", "本地相对安装基线"),
                        ("local_vs_target", "本地相对所选目标（不代表更新方向）")]:
         if report[key] is not None:
@@ -350,9 +408,13 @@ def markdown(report):
 
 
 def parser():
-    p = argparse.ArgumentParser(description="Skill 更新检查 0.1.0：手动、只读，支持公开 GitHub 来源。")
+    p = argparse.ArgumentParser(description="Skill 更新检查 0.1.1：手动、只读，支持公开 GitHub 与 SkillHub 来源。")
     p.add_argument("skill_dir", help="已经核实的本地 Skill 目录")
-    p.add_argument("--repo", help="公开 GitHub HTTPS 仓库 URL；不提供时仅报告来源未知")
+    sources = p.add_mutually_exclusive_group()
+    sources.add_argument("--repo", help="公开 GitHub HTTPS 仓库 URL")
+    sources.add_argument("--skillhub-slug", help="经核实的 SkillHub 公开来源 slug，不按同名推断来源")
+    p.add_argument("--target-version", help="SkillHub 目标版本；不提供时核验文件接口默认版本")
+    p.add_argument("--baseline-version", help="有证据的 SkillHub 历史版本，不能从本地版本号自行推断")
     p.add_argument("--subdir", help="已核实的仓库内 Skill 路径；仓库根目录填 .，不按名称猜测")
     p.add_argument("--ref", default="HEAD", help="明确选择的来源 ref；默认远端 HEAD，输出固定提交")
     mode = p.add_mutually_exclusive_group()
@@ -371,8 +433,12 @@ def main(argv=None):
     args = p.parse_args(argv)
     if args.repo and not args.subdir:
         p.error("--repo 需要已核实的 --subdir")
-    if not args.repo and any((args.subdir, args.source_confirmed, args.compare_only, args.baseline, args.show_upstream_diff)):
-        p.error("来源相关参数需要 --repo")
+    if args.skillhub_slug and any((args.subdir, args.baseline, args.ref != "HEAD")):
+        p.error("SkillHub 来源不能使用 GitHub 的 --subdir、--baseline 或 --ref")
+    if not args.skillhub_slug and any((args.target_version, args.baseline_version)):
+        p.error("--target-version 与 --baseline-version 需要 --skillhub-slug")
+    if not args.repo and not args.skillhub_slug and any((args.subdir, args.source_confirmed, args.compare_only, args.baseline, args.show_upstream_diff)):
+        p.error("来源相关参数需要 --repo 或 --skillhub-slug")
     try:
         report = check(args)
     except (CheckError, OSError, UnicodeError, ValueError) as error:

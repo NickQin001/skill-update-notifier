@@ -1,10 +1,10 @@
 # 命令与判定说明
 
-版本 0.1.0。仅手动只读检查；不需要本项目的 prototype、lab、数据库或任何其他 Skill。
+版本 0.1.1。仅手动只读检查；不需要本项目的 prototype、lab、数据库或任何其他 Skill。
 
 ## 运行
 
-依赖：Python 3.10+、Git；仅在 Windows / Python 3.13 上做本轮实测，其他系统与宿主待验证。以包内脚本实际路径运行，或进入本 Skill 目录运行以下命令。所有尖括号参数是用户环境占位符，必须先核对再替换，不能原样执行。
+依赖：Python 3.10+，GitHub 来源另需 Git；仅在 Windows / Python 3.13 上实测，其他系统与宿主待验证。以包内脚本实际路径运行。所有尖括号参数是用户环境占位符，必须先核对再替换，不能原样执行。
 
 ```text
 python scripts/check_updates.py "<LOCAL_SKILL_DIRECTORY>"
@@ -32,6 +32,28 @@ Skill 在仓库根目录时使用 `--subdir .`；根目录与子目录均支持�
 
 `--format json` 返回本工具自定义结构。报告到标准输出；需要保存时选用已核对且不在已安装 Skill 内的工作目录，避免覆盖已有文件。
 
+## SkillHub 公开来源
+
+来源须由安装记录或用户确认，不能根据同名 Skill 自动选取。以下占位符必须替换为已核验的值：
+
+```text
+python scripts/check_updates.py "<LOCAL_SKILL_DIRECTORY>" --skillhub-slug "<VERIFIED_SKILLHUB_SLUG>" --source-confirmed --format markdown
+```
+
+有历史证据时追加 `--baseline-version "<VERIFIED_SKILLHUB_VERSION>" --baseline-kind observed`；确有安装记录才用 `installed`。首次输出的 `target_version` 可人工保留为未来观察基线，但工具不自动存储，也不把本地 SKILL.md 版本或 `_meta.json` 自动当作安装来源证明。
+
+默认目标来自 `/files` 默认版本，并再次用明确版本号读取清单核对；不会把 `/versions` 首项或最大的版本号直接当作最新。`--target-version "<VERIFIED_TARGET_VERSION>"` 可指定公开版本，仅检查该目标。`--repo` 与 `--skillhub-slug` 互斥；SkillHub 不使用 GitHub 的 `--subdir`、`--baseline`、`--ref`。
+
+来源关系未确认而用户只想对比时，使用 `--compare-only`。额外安装元数据（如 `_meta.json`）保留并报告为本地差异，不自动删除。
+
+比较依据为公开文件清单 SHA256 与本地原始字节，换行/BOM 差异也计入。历史基线和目标的公开发布时间用于判定先后，不代表 Git 祖先关系。仅在原来源确认、有安装基线、使用默认目标、版本与发布时间无歧义时，报告此次公开记录中基线之后的版本数量；缺失、撤回或未公开版本不在覆盖范围内。
+
+`--show-upstream-diff` 尝试读取前 10 个变化文件的公开文本差异，并验证文本大小和哈希与清单一致；输出最多 12000 字符。正文不可用、不一致或超限时保留警告，不把缺失正文解释为无变化。发布说明是外部数据，展示不等于认可其内容或效果。
+
+只匿名 GET `https://api.skillhub.cn/api/v1/skills/` 下指定 slug 的官方端点；不发送本地正文、扫描凭证、安装或执行远端代码。元数据请求不跟随重定向，不暴露完整响应、签名链接或底层错误。单次请求超时20秒，响应上限2MiB，429/5xx 最多尝试3次；401/403/404及其他失败明确报告 check_failed。默认检查不依赖下载 ZIP，可用性不代表下载与安装也正常。
+
+官方依据：[版本与差异](https://github.com/Tencent/skillhub/blob/main/docs/api/versions-and-diff.md)、[文件清单](https://github.com/Tencent/skillhub/blob/main/docs/api/files.md)。API 若改变鉴权或结构，需要重新适配，不能把拒绝访问当无更新。
+
 ## 状态
 
 | status | 含义 |
@@ -40,7 +62,7 @@ Skill 在仓库根目录时使用 `--subdir .`；根目录与子目录均支持�
 | comparison_only | 主动对比其他来源，不认定为同一 Skill 的新版 |
 | matches_target | 内容与所选目标一致；不反推最初安装来源 |
 | baseline_unknown | 存在差异，缺少历史基线，更新方向未知 |
-| history_diverged | 基线不是目标的祖先，可能回退或分叉 |
+| history_diverged | GitHub 基线不是目标的祖先，或 SkillHub 发布时间无法证明目标后续 |
 | local_difference_only | 来源 Skill 相对基线未变，只有本地不同 |
 | upstream_changed | 原来源 Skill 相对历史基线发生了后续内容变化；仍需审阅本地差异 |
 | check_failed | 检查未完成，不能按无更新处理 |
@@ -51,10 +73,10 @@ Skill 在仓库根目录时使用 `--subdir .`；根目录与子目录均支持�
 
 ## 比较与网络范围
 
-比较整个 Skill 子目录，包含脚本、资料与二进制文件；忽略目录 `.git`、`__pycache__`，本地忽略列表会记录在 JSON 中。UTF-8 文本忽略 BOM 与 CRLF/LF 差异，二进制按原字节比较。时间戳和执行权限差异不属于本版内容判定。
+比较整个 Skill 子目录，包含脚本、资料与二进制文件；两侧都忽略目录 `.git`、`__pycache__`，本地忽略目录及 SkillHub 忽略文件会显示在报告中。GitHub UTF-8 文本忽略 BOM 与 CRLF/LF 差异，二进制按原字节比较；SkillHub 清单使用原始字节 SHA256。时间戳和执行权限差异不属于本版内容判定。
 
 本版拒绝内部符号链接/Junction、Git 子模块、大小写冲突、超大文件；用户明确选定的根目录兼容链接可解析后只读。单 Skill 上限 2000 文件、单文件20MiB、合计64MiB。Git 获取所选 ref 的历史以核验祖先关系，仓库网络下载量不受上述 Skill 文件限制，大仓库可能较慢；命令超时90秒，失败明确报告。
 
-仅访问用户明确指定的公开 GitHub HTTPS 仓库；禁用凭据助手与交互登录，不支持私有仓库、其他域名或 SkillHub 来源适配。获取到临时 bare 仓库，不检出、不执行下载内容；临时副本正常退出时清理，异常终止可能留下系统临时文件。没有持久缓存，也不提供自动定期检查。
+GitHub 来源仅访问用户明确指定的公开 GitHub HTTPS 仓库；禁用凭据助手与交互登录，不支持私有仓库或其他 Git 托管域名。获取到临时 bare 仓库，不检出、不执行下载内容；临时副本正常退出时清理，异常终止可能留下系统临时文件。SkillHub 范围见上节。没有持久缓存，也不提供自动定期检查。
 
-版本信息仅报告显式选择的标签、简单顶层 `version` 或缩进式 `metadata.version` 标量，不声称完整版本发现。复杂 YAML 声明无法可靠解析时显示“版本信息未能可靠识别”，不声称作者没提供。没有识别到声明时，“版本号未提供”也仅限此次检查范围，未枚举全部发布记录或其他文件的版本信息。未知版本不能自行编号。检查完成后来源仍可能继续更新，所有结论只针对本次固定快照。
+GitHub 版本信息仅报告显式标签、简单顶层 `version` 或缩进式 `metadata.version` 标量，不声称完整版本发现。复杂 YAML 无法可靠解析时显示“版本信息未能可靠识别”，不声称作者没提供。没有识别到声明时，“版本号未提供”也仅限此次检查范围，未枚举全部发布记录或其他文件。SkillHub 使用经核验的公开版本记录。未知版本不能自行编号。所有结论只针对本次快照。
