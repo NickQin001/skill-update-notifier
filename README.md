@@ -1,32 +1,87 @@
-# Skill 更新检查 · v0.1.1
+# Skill Update Notifier
 
-一个手动调用的 Skill 更新检查工具：比较已安装文件与明确的公开 GitHub 或 SkillHub 来源，展示上游变化和本地差异，帮助用户决定是否更新。
+English | [简体中文](README.zh-CN.md)
 
-本版是早期试用。**只检查和建议，不安装或更新文件。** 自动提醒、使用统计和偏好存储尚未提供。v0.1.1 新增 SkillHub 公开版本记录、文件哈希、本地差异及公开文本差异检查。
+Review upstream changes before updating your AI skills.
 
-## 安装包
+**Current release: [v0.1.1 — manual, read-only preview](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1).** Compare an installed skill with its confirmed public GitHub or SkillHub source, inspect local differences, and decide whether to update.
 
-- `skill-update-notifier/`：完整 Skill 目录，包含入口、说明、Python 脚本和 MIT 许可证。
-- `tests/`：行为与本地 Git 测试，不是运行依赖。
+This release checks files and offers guidance. It does not install updates, schedule reminders, collect usage statistics, or save reminder preferences.
 
-将完整 Skill 目录放入已核对的宿主 Skill 目录；不要将整个仓库当作单个 Skill 覆盖安装。具体使用见 [Skill README](skill-update-notifier/README.md) 和 [命令说明](skill-update-notifier/references/usage.md)。
+## What it does
 
-需要 Python 3.10+ 和读取目标目录/访问公开来源的权限；检查 GitHub 来源还需要 Git，SkillHub 来源不需要 Git。没有第三方 Python 依赖。本轮实际验证环境是 Windows 和 Python 3.13；其他系统及各 AI 工具内的自动发现仍待验证。
+- Checks a specified skill against a confirmed public GitHub repository and subdirectory, or a SkillHub slug.
+- Separates upstream changes from local differences when a verified historical baseline is available.
+- Produces Markdown or JSON reports with file changes, source details, and evidence gaps.
+- Checks SkillHub public version records and file hashes, with optional verified public text diffs and release notes.
+- Preserves local files, including custom files that are absent upstream.
 
-## 核心判定
+A different local file is not proof of a newer release. An unknown source, missing baseline, or failed request is reported explicitly.
 
-本地不同不等于上游有新版。没有可信来源和历史基线时报告缺口；额外本地文件不删除、不自动归入上游更新。历史快照用于区分远端变化与本地差异，提交数不会换算为落后版本数。
+## Install
 
-SkillHub 来源使用官方公开 API，默认比较文件清单 SHA256 与本地原始字节，不依赖下载 ZIP。原始字节不同包含换行/BOM 差异；GitHub 文本比较会忽略这些差异。版本号歧义、清单不一致、读取失败均明确报告。来源须由安装记录或用户确认，不能只按同名匹配。
+1. Download the GitHub ZIP from the [v0.1.1 release](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1), or clone this repository.
+2. Copy the complete `skill-update-notifier/` directory into a skill location supported by your AI tool. Keep its `scripts/` and `references/` directories.
+3. Ask your AI assistant to use the skill, or run the standalone CLI below.
 
-## 验证与反馈
+Check your tool's actual skill directory first. Back up and review an existing installation before replacing it. The repository root also contains tests and documentation; it is not itself the installable skill directory.
+
+**Requirements:** Python 3.10+, permission to read the selected local skill and access its public source, and Git for GitHub checks. SkillHub checks do not require Git. There are no third-party Python runtime dependencies.
+
+Validated environments and limitations are recorded in [VALIDATION.md](VALIDATION.md) (Chinese). Windows with Python 3.13 was tested; other operating systems and automatic skill discovery in individual AI tools remain unverified.
+
+## Ask your AI assistant
+
+> Use skill-update-notifier to check whether my selected skill has upstream changes worth reviewing. Confirm its local directory and original source first, explain local differences, and summarize the findings in English. Do not update files.
+
+The assistant can check several skills individually and combine the results into a table. The packaged instructions and human-readable CLI messages are currently primarily Chinese; this English guide does not add a CLI language option.
+
+## Standalone CLI
+
+Run these commands from the `skill-update-notifier/` directory. Replace every angle-bracket placeholder with a value you have verified. `--source-confirmed` declares that you have confirmed the source; it does not discover or verify an installation relationship for you.
+
+GitHub:
+
+```text
+python scripts/check_updates.py "<LOCAL_SKILL_DIRECTORY>" --repo "<PUBLIC_GITHUB_HTTPS_REPOSITORY>" --subdir "<VERIFIED_SKILL_SUBDIRECTORY>" --source-confirmed --format markdown
+```
+
+Use `--subdir .` when the skill is at the repository root. Without `--ref`, the check resolves the repository's current default `HEAD`.
+
+SkillHub:
+
+```text
+python scripts/check_updates.py "<LOCAL_SKILL_DIRECTORY>" --skillhub-slug "<VERIFIED_SKILLHUB_SLUG>" --source-confirmed --format markdown
+```
+
+Without a historical baseline, the checker can compare files but cannot establish that a new upstream version has appeared since an earlier snapshot. If you have a verified previous source snapshot, add `--baseline <VERIFIED_40_CHARACTER_COMMIT_SHA> --baseline-kind observed` for GitHub, or `--baseline-version "<VERIFIED_SKILLHUB_VERSION>" --baseline-kind observed` for SkillHub. Use `installed` only when an installation record establishes that baseline.
+
+For an explicitly requested comparison with another project whose relationship is unconfirmed, replace `--source-confirmed` with `--compare-only`. Use `--format json` for structured results. Full options are in [usage.md](skill-update-notifier/references/usage.md) (Chinese).
+
+## Read the result
+
+| Status | Meaning |
+| --- | --- |
+| `upstream_changed` | The confirmed source changed after the verified baseline; review local differences before updating. |
+| `matches_target` | Local contents match the selected source snapshot. |
+| `local_difference_only` | The source skill is unchanged from the baseline; local contents differ. |
+| `baseline_unknown` | Differences exist, but there is no verified historical baseline. |
+| `source_unknown` / `comparison_only` | The original source is unconfirmed, or this is only a comparison with another project. |
+| `history_diverged` | The available history does not establish a normal forward update. |
+| `check_failed` | The check did not complete; this does not mean there are no updates. |
+
+Commit counts are not treated as counts of missed versions. GitHub UTF-8 text comparisons ignore BOM and line-ending differences; SkillHub compares raw-byte SHA256 hashes, so those differences are included. Release notes are the author's statements, not independent evidence of improvement.
+
+## Privacy and feedback
+
+The checker reads the selected local skill without uploading its contents or executing downloaded source code. It accesses the specified public GitHub source or SkillHub's public API. Source ambiguity, inconsistent manifests, and request failures are reported rather than guessed.
+
+To run the isolated tests from the repository root:
 
 ```text
 python -m unittest discover -s tests -v
 ```
 
-测试在临时目录运行，只使用隔离样例；不修改用户已安装 Skill。真实联网验证结果与边界见 [VALIDATION.md](VALIDATION.md)。源码公开和结构校验都不等于所有宿主可用或平台审核通过。
+Use [Issues](https://github.com/NickQin001/skill-update-notifier/issues) to report whether a check helped you decide to update or keep your current skill. Include a redacted command or request, the relevant result, and your reason. Omit credentials, private paths, and complete private skill contents.
 
-反馈建议包含：命令或自然语言请求（先脱敏）、结果是否帮助你决定更新/保留、决定原因。不需要上传完整本地 Skill、私人路径或凭证。
-
-许可为 MIT，见 Skill 目录内 LICENSE。发布包范围见 [PUBLISHING.zh-CN.md](PUBLISHING.zh-CN.md)。
+License: [MIT](skill-update-notifier/LICENSE). Packaging details: [PUBLISHING.zh-CN.md](PUBLISHING.zh-CN.md) (Chinese).
