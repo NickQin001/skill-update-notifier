@@ -1,3 +1,9 @@
+# 发布说明
+
+当前包版本是 **0.2.0**（用时检查）。0.2.0 只更新文档、约定和版本号，不创建 GitHub Release 或标签，也不上传 SkillHub。不要把下面的 v0.1.1 包名、标签或上传清单改写成 0.2.0 的发布物。当前行为以 [SKILL.md](skill-update-notifier/SKILL.md) 和 [CHANGELOG.md](CHANGELOG.md) 为准。
+
+以下保留为 v0.1.1 的历史发布口径。
+
 # v0.1.1 发布说明
 
 发布定位：**Skill 更新检查（手动试用版）**。Slug：`skill-update-notifier`。版本：`0.1.1`；GitHub 标签 `v0.1.1`，标记预发布。
