@@ -4,7 +4,7 @@
 
 先看已确认的公开来源有没有变化，再自己决定要不要更新。
 
-**当前版本：0.2.1（用时检查）。** 检查方式与 0.2.0 相同。本版还没有 GitHub Release 或标签。已发布的预发布仍是 [v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)，标签指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`，附件为 `skill-update-notifier-0.2.0-github.zip`、`skill-update-notifier-0.2.0-skillhub.zip` 和 `SHA256SUMS.txt`。更早的 [v0.1.1 预发布](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1) 仍保留。
+**当前版本：0.2.1（用时检查）。** 检查方式与 0.2.0 相同。预发布见 [v0.2.1](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1)，标签指向 `d41023de274b5a84938de3337ec63e56a70669c0`。附件为 `skill-update-notifier-0.2.1-github.zip`、`skill-update-notifier-0.2.1-skillhub.zip` 和 `SHA256SUMS.txt`。上一份预发布仍是 [v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)。更早的 [v0.1.1 预发布](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1) 仍保留。
 
 你明确点名某个 Skill，或要求按该 Skill 工作时，就在这次使用中检查这一个 Skill。用时检查是文档约定，不是平台钩子。可选的每日 Routine 只作补充，不能代替用时检查。本版仍不自动安装、不覆盖已有安装、不采集使用统计，也不保存提醒偏好。
 
@@ -23,7 +23,7 @@
 
 ## 安装
 
-1. 克隆本仓库以取得 0.2.1。[v0.2.0 预发布](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0) 是上一份已发布的包，标签指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`。
+1. 克隆本仓库，或从 [v0.2.1 预发布](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1) 下载附件。该标签指向 `d41023de274b5a84938de3337ec63e56a70669c0`。
 2. 将完整的 `skill-update-notifier/` 目录放入你的 AI 工具支持的 Skill 目录，保留 `scripts/` 和 `references/`。安装不需要钩子。`SKILL.md` 附录 A 里的 Claude Code 示例是可选的。
 3. 让 AI 按该 Skill 工作，或在你想比较本机文件时独立运行下方 CLI。
 

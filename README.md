@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 
 Review a confirmed public source before you decide whether a skill is worth another look.
 
-**Current version: 0.2.1 — check at use time (用时检查).** The check behaves the same as 0.2.0. This version has no GitHub Release or tag yet. The published prerelease remains [v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0), tagged at `15981bfa0fab4457ac12bd0ba126a508d44817ab`, with assets `skill-update-notifier-0.2.0-github.zip`, `skill-update-notifier-0.2.0-skillhub.zip`, and `SHA256SUMS.txt`. The tagged [v0.1.1 preview](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1) is the earlier release.
+**Current version: 0.2.1 — check at use time (用时检查).** The check behaves the same as 0.2.0. The prerelease is [v0.2.1](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1). Its tag points at `d41023de274b5a84938de3337ec63e56a70669c0`. Assets are `skill-update-notifier-0.2.1-github.zip`, `skill-update-notifier-0.2.1-skillhub.zip`, and `SHA256SUMS.txt`. The previous prerelease remains [v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0). The tagged [v0.1.1 preview](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1) is the earlier release.
 
 When you name a skill or ask to work by that skill, check that skill at use time. The check is a documented duty, not a platform hook. An optional daily routine complements it and does not replace it. The check still does not install updates, overwrite an install, collect usage statistics, or save reminder preferences.
 
@@ -23,7 +23,7 @@ A different local file is not proof of a newer release. An unknown source, missi
 
 ## Install
 
-1. Clone this repository for 0.2.1. The [v0.2.0 prerelease](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0) is the previous published package; its tag points at `15981bfa0fab4457ac12bd0ba126a508d44817ab`.
+1. Clone this repository, or download the assets from the [v0.2.1 prerelease](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1). That tag points at `d41023de274b5a84938de3337ec63e56a70669c0`.
 2. Copy the complete `skill-update-notifier/` directory into a skill location supported by your AI tool. Keep its `scripts/` and `references/` directories. No hook is required. The Claude Code sample in `SKILL.md` Appendix A is optional.
 3. Ask your AI assistant to use the skill, or run the standalone CLI below when you want a local comparison.
 

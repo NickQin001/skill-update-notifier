@@ -4,7 +4,7 @@
 
 升到 0.2.1，以便 SkillHub 接受新的上传。相对 0.2.0 没有产品或行为变化。
 
-文档里仍把 v0.2.0 写成「没有 GitHub Release 或标签」的地方已改正。已有预发布：[v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)，标签指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`，附件为 `skill-update-notifier-0.2.0-github.zip`、`skill-update-notifier-0.2.0-skillhub.zip` 和 `SHA256SUMS.txt`。本版不创建 v0.2.1 的 Release 或标签。
+文档里仍把 v0.2.0 写成「没有 GitHub Release 或标签」的地方已改正。已有预发布：[v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)，标签指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`。本版随后已有预发布 [v0.2.1](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1)，标签指向 `d41023de274b5a84938de3337ec63e56a70669c0`，附件为 `skill-update-notifier-0.2.1-github.zip`、`skill-update-notifier-0.2.1-skillhub.zip` 和 `SHA256SUMS.txt`。
 
 ## 0.2.0 — 用时检查
 
