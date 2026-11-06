@@ -1,6 +1,14 @@
 # 发布说明
 
-当前包版本是 **0.2.0**（用时检查）。0.2.0 只更新文档、约定和版本号，不创建 GitHub Release 或标签，也不上传 SkillHub。不要把下面的 v0.1.1 包名、标签或上传清单改写成 0.2.0 的发布物。当前行为以 [SKILL.md](skill-update-notifier/SKILL.md) 和 [CHANGELOG.md](CHANGELOG.md) 为准。
+当前包版本是 **0.2.0**（用时检查）。GitHub 预发布标签为 [`v0.2.0`](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)，指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`。没有把包上传到 SkillHub。
+
+## v0.2.0 发布物
+
+- `skill-update-notifier-0.2.0-skillhub.zip`：6 个文件，`SKILL.md` 在 ZIP 根目录，另有 README.md、LICENSE、`references/usage.md` 与两个脚本。供平台上传，不等于已收录或审核。
+- `skill-update-notifier-0.2.0-github.zip`：Skill 目录、离线测试和项目说明。
+- `SHA256SUMS.txt`：两个 ZIP 的摘要，附在同一 GitHub Release。
+
+行为以 [SKILL.md](skill-update-notifier/SKILL.md) 和 [CHANGELOG.md](CHANGELOG.md) 为准。下面的 v0.1.1 包名、标签和上传清单保持为历史记录。
 
 以下保留为 v0.1.1 的历史发布口径。
 
