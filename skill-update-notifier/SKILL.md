@@ -2,10 +2,10 @@
 name: skill-update-notifier
 description: 用户明确点名某个 Skill 或要求按该 Skill 工作时，只对该 Skill 做用时更新检查；用户主动要求检查更新时也同样使用。默认只查公开 GitHub 或 SkillHub，不读本机、不代为安装或覆盖。用时检查是文档约定，不是平台钩子。
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
-# Skill 更新检查（0.2.0 · 用时检查）
+# Skill 更新检查（0.2.1 · 用时检查）
 
 帮助用户判断公开来源有没有值得再看的变化。用时检查指：用户明确点名某个 Skill，或清楚要求按该 Skill 工作时，在这次使用中检查这一个 Skill。
 

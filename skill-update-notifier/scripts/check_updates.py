@@ -20,7 +20,7 @@ import subprocess
 import sys
 import tempfile
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 MAX_FILES = 2000
 MAX_BYTES = 64 * 1024 * 1024
 MAX_FILE_BYTES = 20 * 1024 * 1024
@@ -410,7 +410,7 @@ def markdown(report):
 
 
 def parser():
-    p = argparse.ArgumentParser(description="Skill 更新检查 0.2.0：只读比较本次已允许的本地目录与公开 GitHub 或 SkillHub 来源。不猜测同名来源，不安装、不覆盖。")
+    p = argparse.ArgumentParser(description="Skill 更新检查 0.2.1：只读比较本次已允许的本地目录与公开 GitHub 或 SkillHub 来源。不猜测同名来源，不安装、不覆盖。")
     p.add_argument("skill_dir", help="本次会话已明确允许读取的本地 Skill 目录；未允许时不要运行")
     sources = p.add_mutually_exclusive_group()
     sources.add_argument("--repo", help="公开 GitHub HTTPS 仓库 URL")
