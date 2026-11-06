@@ -2,6 +2,8 @@
 
 All JSON fields emitted here are this tool's schema, not a host or marketplace API.
 Explicit public GitHub and SkillHub sources; no automatic source guessing.
+Running this script reads the local directory argument. Use-time checks do not
+run it unless this session already allowed a local comparison.
 """
 from __future__ import annotations
 
@@ -18,7 +20,7 @@ import subprocess
 import sys
 import tempfile
 
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 MAX_FILES = 2000
 MAX_BYTES = 64 * 1024 * 1024
 MAX_FILE_BYTES = 20 * 1024 * 1024
@@ -408,8 +410,8 @@ def markdown(report):
 
 
 def parser():
-    p = argparse.ArgumentParser(description="Skill 更新检查 0.1.1：手动、只读，支持公开 GitHub 与 SkillHub 来源。")
-    p.add_argument("skill_dir", help="已经核实的本地 Skill 目录")
+    p = argparse.ArgumentParser(description="Skill 更新检查 0.2.0：只读比较本次已允许的本地目录与公开 GitHub 或 SkillHub 来源。不猜测同名来源，不安装、不覆盖。")
+    p.add_argument("skill_dir", help="本次会话已明确允许读取的本地 Skill 目录；未允许时不要运行")
     sources = p.add_mutually_exclusive_group()
     sources.add_argument("--repo", help="公开 GitHub HTTPS 仓库 URL")
     sources.add_argument("--skillhub-slug", help="经核实的 SkillHub 公开来源 slug，不按同名推断来源")

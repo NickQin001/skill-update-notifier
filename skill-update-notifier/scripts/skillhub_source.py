@@ -31,7 +31,7 @@ def read_json(url):
         raise SkillHubError("SkillHub 请求来源无效")
     for attempt in range(3):
         try:
-            request = Request(url, headers={"Accept": "application/json", "User-Agent": "skill-update-notifier/0.1.1"})
+            request = Request(url, headers={"Accept": "application/json", "User-Agent": "skill-update-notifier/0.2.0"})
             with build_opener(NoRedirect()).open(request, timeout=20) as response:
                 data = response.read(MAX_RESPONSE + 1)
             if len(data) > MAX_RESPONSE:

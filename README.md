@@ -2,43 +2,46 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Review upstream changes before updating your AI skills.
+Review a confirmed public source before you decide whether a skill is worth another look.
 
-**Current release: [v0.1.1 — manual, read-only preview](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1).** Compare an installed skill with its confirmed public GitHub or SkillHub source, inspect local differences, and decide whether to update.
+**Current version: 0.2.0 — check at use time (用时检查).** This is the tree on `main`. Version 0.2.0 does not add a GitHub Release or git tag. The tagged [v0.1.1 preview](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1) is the previous release only.
 
-This release checks files and offers guidance. It does not install updates, schedule reminders, collect usage statistics, or save reminder preferences.
+When you name a skill or ask to work by that skill, check that skill at use time. The check is a documented duty, not a platform hook. An optional daily routine complements it and does not replace it. The check still does not install updates, overwrite an install, collect usage statistics, or save reminder preferences.
 
 ## What it does
 
-- Checks a specified skill against a confirmed public GitHub repository and subdirectory, or a SkillHub slug.
-- Separates upstream changes from local differences when a verified historical baseline is available.
-- Produces Markdown or JSON reports with file changes, source details, and evidence gaps.
+- At use time, checks only the skill you named, not your whole library.
+- Consults a confirmed public GitHub repository and subdirectory, or a SkillHub slug. Use-time and routine checks stay on those public sources and do not read your machine unless you allow a local comparison in that session.
+- Compares upstream only when the skill body, a known install record, or you in this turn provide the original source URL or SkillHub slug. Otherwise it says the source is unconfirmed and skips the version judgment. It does not guess a same-name repository.
+- If it did not read the local install, it does not claim that the local copy is already current.
+- After the task you named, adds a short note only when there is an update, the source is unknown, or the local install was not compared. When none of those apply, it adds nothing.
+- When you allow a local comparison, separates upstream changes from local differences if a verified historical baseline exists, and writes a Markdown or JSON report.
 - Checks SkillHub public version records and file hashes, with optional verified public text diffs and release notes.
-- Preserves local files, including custom files that are absent upstream.
+- Leaves local files in place, including custom files that are absent upstream. It does not install or overwrite for you.
 
-A different local file is not proof of a newer release. An unknown source, missing baseline, or failed request is reported explicitly.
+A different local file is not proof of a newer release. An unknown source, missing baseline, or failed request is reported explicitly. An optional routine covers only library skills whose source is already confirmed, skips Cursor-managed skills, stays quiet when nothing changed, and uses the same public-only default.
 
 ## Install
 
-1. Download the GitHub ZIP from the [v0.1.1 release](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.1.1), or clone this repository.
-2. Copy the complete `skill-update-notifier/` directory into a skill location supported by your AI tool. Keep its `scripts/` and `references/` directories.
-3. Ask your AI assistant to use the skill, or run the standalone CLI below.
+1. Clone this repository. Version 0.2.0 is the current documentation and skill tree; it has no Release and no git tag.
+2. Copy the complete `skill-update-notifier/` directory into a skill location supported by your AI tool. Keep its `scripts/` and `references/` directories. No hook is required. The Claude Code sample in `SKILL.md` Appendix A is optional.
+3. Ask your AI assistant to use the skill, or run the standalone CLI below when you want a local comparison.
 
 Check your tool's actual skill directory first. Back up and review an existing installation before replacing it. The repository root also contains tests and documentation; it is not itself the installable skill directory.
 
-**Requirements:** Python 3.10+, permission to read the selected local skill and access its public source, and Git for GitHub checks. SkillHub checks do not require Git. There are no third-party Python runtime dependencies.
+**Requirements:** Python 3.10+ for the CLI, access to the confirmed public source, and Git for GitHub checks. SkillHub checks do not require Git. There are no third-party Python runtime dependencies. The CLI reads the local directory you pass, so run it only after you allow that comparison in the session. The default use-time check does not run the CLI.
 
 Validated environments and limitations are recorded in [VALIDATION.md](VALIDATION.md) (Chinese). Windows with Python 3.13 was tested; other operating systems and automatic skill discovery in individual AI tools remain unverified.
 
 ## Ask your AI assistant
 
-> Use skill-update-notifier to check whether my selected skill has upstream changes worth reviewing. Confirm its local directory and original source first, explain local differences, and summarize the findings in English. Do not update files.
+> Use the skill I named and finish that task first. Then check only that skill against its confirmed public source. Do not read my machine, do not install or overwrite files, and do not claim my local copy is current. If the source is unknown, say so and skip the version judgment.
 
-The assistant can check several skills individually and combine the results into a table. The packaged instructions and human-readable CLI messages are currently primarily Chinese; this English guide does not add a CLI language option.
+Name more than one skill only when each of them should be checked. That still does not scan the rest of the library. The packaged instructions and human-readable CLI messages are currently primarily Chinese; this English guide does not add a CLI language option.
 
 ## Standalone CLI
 
-Run these commands from the `skill-update-notifier/` directory. Replace every angle-bracket placeholder with a value you have verified. `--source-confirmed` declares that you have confirmed the source; it does not discover or verify an installation relationship for you.
+Run these commands from the `skill-update-notifier/` directory only when this session may read the local skill. Replace every angle-bracket placeholder with a value you have verified. `--source-confirmed` declares that you have confirmed the source; it does not discover or verify an installation relationship for you. Without that confirmation, do not point the CLI at a same-name repository and treat the result as a version judgment.
 
 GitHub:
 
@@ -60,6 +63,8 @@ For an explicitly requested comparison with another project whose relationship i
 
 ## Read the result
 
+These statuses come from a local comparison you allowed. A public-only check does not use them to claim the local copy is current.
+
 | Status | Meaning |
 | --- | --- |
 | `upstream_changed` | The confirmed source changed after the verified baseline; review local differences before updating. |
@@ -74,7 +79,7 @@ Commit counts are not treated as counts of missed versions. GitHub UTF-8 text co
 
 ## Privacy and feedback
 
-The checker reads the selected local skill without uploading its contents or executing downloaded source code. It accesses the specified public GitHub source or SkillHub's public API. Source ambiguity, inconsistent manifests, and request failures are reported rather than guessed.
+A use-time or routine check uses the confirmed public GitHub source or SkillHub's public API and does not read the local skill. The CLI, once you allow it, reads the selected local skill without uploading its contents or executing downloaded source code. It does not write to or replace the install. Source ambiguity, inconsistent manifests, and request failures are reported rather than guessed.
 
 To run the isolated tests from the repository root:
 
