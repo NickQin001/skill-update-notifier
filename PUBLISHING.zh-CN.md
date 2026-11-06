@@ -1,6 +1,12 @@
 # 发布说明
 
-当前包版本是 **0.2.1**（用时检查，行为与 0.2.0 相同）。这次不创建 v0.2.1 的 GitHub Release 或标签，也不在这里上传 SkillHub。已发布的预发布仍是 [`v0.2.0`](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)，指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`。SkillHub 上已有 0.2.0。
+当前包版本是 **0.2.1**（用时检查，行为与 0.2.0 相同）。GitHub 预发布标签为 [`v0.2.1`](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1)，指向 `d41023de274b5a84938de3337ec63e56a70669c0`。没有把 0.2.1 上传到 SkillHub。SkillHub 上已有 0.2.0。上一份预发布仍是 [`v0.2.0`](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)。
+
+## v0.2.1 发布物
+
+- `skill-update-notifier-0.2.1-skillhub.zip`：6 个文件，`SKILL.md` 在 ZIP 根目录，另有 README.md、LICENSE、`references/usage.md` 与两个脚本。供以后上传，不等于平台已收录或审核。
+- `skill-update-notifier-0.2.1-github.zip`：Skill 目录、离线测试和项目说明。
+- `SHA256SUMS.txt`：两个 ZIP 的摘要，附在同一 GitHub Release。
 
 ## v0.2.0 发布物
 

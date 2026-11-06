@@ -1,6 +1,6 @@
 # 验证记录
 
-当前包版本是 **0.2.1**。0.2.1 相对 0.2.0 只有版本号变化，见 [CHANGELOG.md](CHANGELOG.md)。已发布的预发布是 [v0.2.0](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.0)，标签指向 `15981bfa0fab4457ac12bd0ba126a508d44817ab`。这里没有新建 v0.2.1 的 Release 或标签，也没有新的一轮行为验收。
+当前包版本是 **0.2.1**。0.2.1 相对 0.2.0 只有版本号变化，见 [CHANGELOG.md](CHANGELOG.md)。预发布是 [v0.2.1](https://github.com/NickQin001/skill-update-notifier/releases/tag/v0.2.1)，标签指向 `d41023de274b5a84938de3337ec63e56a70669c0`。这里没有新的一轮行为验收。
 
 下面是 **v0.1.1**（2026-10-22）对只读比较脚本的发布前验证，不是 0.2.0 用时检查、Routine 或宿主钩子的验收。其中“本版不提供自动提醒”描述的是当时的脚本能力。0.2.0 与 0.2.1 的用时检查仍不是平台钩子，也不代为安装或覆盖。
 
